@@ -1,5 +1,5 @@
 {
- "aggiornato": "2026-11-05",
+ "aggiornato": "2026-11-05 sera",
  "posizioni": {
   "21": {
    "nome": "SN21 AdTAO",
@@ -23,14 +23,6 @@
    "nome": "SN24 ms.computer",
    "stop": 0.0088,
    "obiettivo": 0.014
-  },
-  "127": {
-   "nome": "SN127 Zils (ex Astrid)",
-   "stop": 0.0036,
-   "obiettivo": 0.006,
-   "pianta": true,
-   "massimo": 0.005043177989554875,
-   "azione_obiettivo": "vendi 2/3, il resto corre"
   },
   "75": {
    "nome": "SN75 Hippius",
