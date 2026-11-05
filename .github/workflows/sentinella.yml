@@ -1,0 +1,34 @@
+name: sentinella
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+concurrency:
+  group: sentinella
+  cancel-in-progress: false
+jobs:
+  controllo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ripristina stato
+        uses: actions/cache/restore@v4
+        with:
+          path: stato.json
+          key: stato-${{ github.run_id }}
+          restore-keys: stato-
+      - name: Controllo prezzi (solo lettura)
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          TZ: Europe/Rome
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then echo "Manca il segreto NTFY_TOPIC"; exit 1; fi
+          python3 sentinella.py
+          cat sentinella.log 2>/dev/null || true
+      - name: Salva stato
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: stato.json
+          key: stato-${{ github.run_id }}
