@@ -36,6 +36,10 @@
    "pianta": true,
    "massimo": 0.00864004879541557,
    "azione_obiettivo": "vendi 2/3, il resto corre"
+  },
+  "8": {
+   "nome": "SN8 Vanta",
+   "stop": 0.0291
   }
  }
 }
