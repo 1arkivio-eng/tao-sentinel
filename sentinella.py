@@ -73,26 +73,33 @@ def main():
         if p.get("obiettivo") and prezzo >= float(p["obiettivo"]):
             avvisa(f"o{k}", f"{nome}: {prezzo:.6f} OBIETTIVO {p['obiettivo']} raggiunto -> {p.get('azione_obiettivo', 'vendi metà')}")
 
-    # lanci: subnet senza scambi (o appena ri-registrate) che iniziano a scambiare
-    attesa = set(st.get("attesa", []))
+    # lanci: (1) netuid ri-registrato -> preavviso; (2) appena partono scambi nuovi -> avviso LANCIO.
+    # Il conteggio scambi 24h di un netuid riusato include quelli della subnet precedente:
+    # si confronta con il valore al momento della registrazione (linea di base).
+    attesa = st.get("attesa", {})
+    if isinstance(attesa, list):
+        attesa = {str(n): 0 for n in attesa}
     reg = st.get("registrazioni", {})
+    primo_giro = not reg
     for n, x in m.items():
         if n == 0:
             continue
-        vol = float(x.get("volume_24h_tao") or 0)
+        k = str(n)
+        scambi = int(x.get("buy_count_24h") or 0) + int(x.get("sell_count_24h") or 0)
         rb = str(x.get("registered_block"))
-        if reg.get(str(n)) not in (None, rb) and vol == 0:
-            attesa.add(n)
-        if vol == 0 and str(n) not in reg:
-            attesa.add(n)
-        reg[str(n)] = rb
-        if n in attesa and vol > 0:
-            avvisa(f"l{n}{rb}", f"LANCIO SN{n} {x.get('name')}: scambi partiti, prezzo {float(x['price_tao']):.5f}, pool {float(x.get('tao_reserve') or 0):.0f} TAO -> valuta entrata entro 6 ore (scrivi a Claude)")
-            attesa.discard(n)
-    for n, x in m.items():
-        if float(x.get("volume_24h_tao") or 0) == 0 and n != 0:
-            attesa.add(n)
-    st["attesa"] = sorted(attesa); st["registrazioni"] = reg
+        nome = x.get("name") or f"SN{n}"
+        if not primo_giro and reg.get(k) not in (None, rb):
+            attesa[k] = scambi
+            avvisa(f"r{n}{rb}", f"NUOVA SUBNET su SN{n} ({nome}): appena registrata, scambi non ancora partiti. Ti avviso quando partono.")
+        elif primo_giro and scambi == 0:
+            attesa[k] = 0
+        reg[k] = rb
+        if k in attesa and scambi > attesa[k]:
+            avvisa(f"l{n}{rb}", f"LANCIO SN{n} {nome}: scambi partiti, prezzo {float(x.get('price_tao') or 0):.5f}, pool {float(x.get('tao_reserve') or 0):.0f} TAO -> valuta entrata entro 6 ore (scrivi a Claude)")
+            del attesa[k]
+        elif k in attesa:
+            attesa[k] = min(attesa[k], scambi)  # la base scende man mano che escono i vecchi scambi
+    st["attesa"] = attesa; st["registrazioni"] = reg
 
     for a in avvisi:
         push(topic, a)
