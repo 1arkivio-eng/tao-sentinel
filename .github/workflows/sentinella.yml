@@ -8,12 +8,12 @@ concurrency:
   cancel-in-progress: false
 jobs:
   controllo:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Ripristina stato
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: stato.json
           key: stato-${{ github.run_id }}
@@ -28,7 +28,7 @@ jobs:
           cat sentinella.log 2>/dev/null || true
       - name: Salva stato
         if: always()
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: stato.json
           key: stato-${{ github.run_id }}
