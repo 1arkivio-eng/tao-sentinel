@@ -38,17 +38,23 @@ def main():
     except Exception:
         st = {}
     st.setdefault("inviati", {}); st.setdefault("massimi", {})
-    r = curl(["-A", "tao-sentinel/1.0", URL])
+    r = curl(["--retry", "2", "-A", "Mozilla/5.0 (compatible; tao-sentinel/1.0)", "-H", "Accept: application/json",
+              "-w", "\nHTTP=%{http_code}", URL])
+    corpo, _, codice = r.stdout.rpartition("\nHTTP=")
     try:
-        d = json.loads(r.stdout)
+        d = json.loads(corpo)
         d = d.get("data", d) if isinstance(d, dict) else d
         m = {int(x["netuid"]): x for x in d}
     except Exception:
         st["errori"] = st.get("errori", 0) + 1
-        log(f"dati non disponibili ({st['errori']} di fila)")
-        if st["errori"] == 6:  # ~30 minuti senza dati
-            push(topic, "Sentinella: Taosis non risponde da ~30 minuti, controlli sospesi finché non torna.", "Sentinella", "default")
+        diag = f"HTTP {codice or '?'} {r.stderr.strip()[:80]} {corpo.strip()[:80]!r}"
+        log(f"dati non disponibili ({st['errori']} di fila): {diag}")
+        print("DATI NON DISPONIBILI:", diag)
+        if st["errori"] % 144 == 6:  # dopo ~30 minuti, poi ogni ~12 ore
+            push(topic, f"Sentinella: Taosis non risponde da ~30 min ({diag[:90]}). Controlli sospesi.", "Sentinella", "default")
         STATE.write_text(json.dumps(st)); return
+    if st.get("errori", 0) >= 6:
+        push(topic, f"Sentinella: dati Taosis tornati dopo {st['errori']} giri falliti, controlli ripresi.", "Sentinella", "default")
     st["errori"] = 0
     ora = time.time()
     avvisi = []

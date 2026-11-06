@@ -11,8 +11,13 @@ CAMPI = ["netuid", "name", "price_tao", "moving_price", "tao_reserve", "alpha_in
          "registered_block", "owner_alpha_held", "owner_net_alpha_sold_7d", "owner_net_tao_sold_7d",
          "holders", "top10_share", "change_1h", "change_24h", "change_7d"]
 
-r = subprocess.run(["curl", "-sS", "-m", "60", "--retry", "3", "-A", "tao-sentinel/1.0", URL], capture_output=True, text=True)
-d = json.loads(r.stdout)
+r = subprocess.run(["curl", "-sS", "-m", "60", "--retry", "3", "-A", "Mozilla/5.0 (compatible; tao-sentinel/1.0)",
+                    "-H", "Accept: application/json", "-w", "\nHTTP=%{http_code}", URL], capture_output=True, text=True)
+corpo, _, codice = r.stdout.rpartition("\nHTTP=")
+try:
+    d = json.loads(corpo)
+except Exception:
+    raise SystemExit(f"DATI NON DISPONIBILI: HTTP {codice or '?'} {r.stderr.strip()[:120]} {corpo.strip()[:200]!r}")
 d = d.get("data", d) if isinstance(d, dict) else d
 now = dt.datetime.now(dt.timezone.utc)
 buf = io.StringIO()
