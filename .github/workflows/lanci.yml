@@ -28,6 +28,7 @@ jobs:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           PROVA: ${{ inputs.prova }}
           TZ: Europe/Rome
+          DURATA_MAX: "0"   # repo privato: un solo controllo per giro, niente controllo rapido (risparmia minuti)
         run: |
           if [ -z "$NTFY_TOPIC" ]; then echo "Manca il segreto NTFY_TOPIC"; exit 1; fi
           python3 lanci.py

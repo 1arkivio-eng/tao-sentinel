@@ -123,6 +123,7 @@ def dettagli(d, n):
             return mappa(nodo, prefisso, testa).get(n, b"")
         except Exception:
             return b""
+    # nota: legge l'intera mappa (~130 voci); succede solo quando c'è un avviso
     nome = testo_scale(uno(IDENTITA)) or f"SN{n}"
     simbolo = testo_scale(uno(SIMBOLO))
     tao, alpha = intero(uno(POOL_TAO)), intero(uno(POOL_ALPHA))
@@ -137,59 +138,84 @@ def quando(blocchi):
     return f"dal {t:%d/%m %H:%M} circa"
 
 
-def main():
-    topic = os.environ["NTFY_TOPIC"].strip()
-    try:
-        st = json.loads(STATE.read_text())
-    except Exception:
-        st = {}
-    try:
-        d = leggi_catena()
-    except Exception as e:
-        st["errori"] = st.get("errori", 0) + 1
-        log(f"catena non leggibile ({st['errori']} di fila): {e}")
-        if st["errori"] % 48 == 3:  # dopo ~3 giri falliti, poi ogni ~24 ore
-            push(topic, f"Rilevatore lanci: nodi Bittensor non raggiungibili da {st['errori']} giri ({str(e)[:100]}). Controlli sospesi.", "Rilevatore lanci", "default")
-        STATE.write_text(json.dumps(st)); raise SystemExit(1)
-    if st.get("errori", 0) >= 3:
-        push(topic, f"Rilevatore lanci: catena di nuovo leggibile dopo {st['errori']} giri falliti.", "Rilevatore lanci", "default")
-    st["errori"] = 0
-
+def controlla(topic, st, d):
+    """Un controllo: confronta la catena con lo stato e manda gli avvisi. Ritorna i netuid in finestra di lancio."""
     aperte = {str(n) for n, v in d["abilitato"].items() if v[:1] == b"\x01"}
     reg = {str(n): intero(v) for n, v in d["registrata"].items()}
     primo_giro = "reg" not in st
-    log(f"blocco {d['blocco']} via {d['nodo']}: {len(reg)} subnet, {len(aperte)} con scambi aperti")
-
     if not primo_giro:
         vecchie_reg, vecchie_aperte = st["reg"], set(st["aperte"])
         for k, blocco_reg in sorted(reg.items(), key=lambda x: int(x[0])):
             n = int(k)
+            if n == 0:
+                continue
             nuova = vecchie_reg.get(k) != blocco_reg  # netuid nuovo o riusato (ri-registrato)
-            if nuova and n != 0:
+            if nuova:
                 nome, simbolo, _, _ = dettagli(d, n)
-                stato = "scambi GIÀ aperti" if k in aperte else f"scambi chiusi; apertura {quando(blocco_reg + d['ritardo'] - d['blocco'])}, quando il proprietario fa lo start"
+                stato = "scambi GIÀ aperti" if k in aperte else f"scambi chiusi; apertura possibile {quando(blocco_reg + d['ritardo'] - d['blocco'])}, quando il proprietario fa lo start"
                 push(topic, f"Nuova subnet registrata su SN{n}: {nome} {simbolo}. {stato}. Ti avviso quando partono gli scambi.",
                      f"Nuova subnet SN{n}", "default", n)
-            if n != 0 and k in aperte and (nuova or k not in vecchie_aperte):
+            if k in aperte and (nuova or k not in vecchie_aperte):
                 nome, simbolo, prezzo, pool = dettagli(d, n)
-                ore = (d["blocco"] - blocco_reg) * SECONDI_BLOCCO / 3600
+                giorni = (d["blocco"] - blocco_reg) * SECONDI_BLOCCO / 86400
                 push(topic, f"SN{n} {nome} {simbolo}: token scambiabile ora. Prezzo {prezzo:.5f} TAO, pool {pool:,.0f} TAO, "
-                            f"registrata {ore / 24:.1f} giorni fa. Valuta l'entrata entro 6 ore (scrivi a Claude).",
+                            f"registrata {giorni:.1f} giorni fa. Valuta l'entrata entro 6 ore (scrivi a Claude).",
                      f"LANCIO SN{n}: scambi aperti", "urgent", n)
+            elif k not in aperte and d["blocco"] >= blocco_reg + d["ritardo"] and k not in st.get("pronte", []):
+                nome, simbolo, _, _ = dettagli(d, n)
+                push(topic, f"SN{n} {nome} {simbolo}: da ora il proprietario può aprire gli scambi in qualsiasi momento. Controllo rapido attivo.",
+                     f"SN{n} pronta al lancio", "default", n)
     else:
         log("primo giro: memorizzo lo stato attuale, nessun avviso")
-    if os.environ.get("PROVA") == "true":  # avvio a mano con "prova": simula il lancio della subnet registrata più di recente
+    attesa = [k for k in reg if k not in aperte and k != "0"]
+    # finestra di lancio: start già possibile o possibile entro ~15 minuti
+    finestra = [k for k in attesa if d["blocco"] >= reg[k] + d["ritardo"] - 75]
+    st["reg"], st["aperte"] = reg, sorted(aperte, key=int)
+    st["pronte"] = [k for k in attesa if d["blocco"] >= reg[k] + d["ritardo"]]
+    log(f"blocco {d['blocco']}: {len(reg) - 1} subnet, in attesa {['SN' + k for k in attesa]}, in finestra {['SN' + k for k in finestra]}")
+    return reg, aperte, attesa, finestra
+
+
+def main():
+    topic = os.environ["NTFY_TOPIC"].strip()
+    durata = float(os.environ.get("DURATA_MAX", "540"))  # secondi di controllo rapido per giro, solo in finestra
+    passo = float(os.environ.get("PASSO", "20"))
+    inizio = time.time()
+    try:
+        st = json.loads(STATE.read_text())
+    except Exception:
+        st = {}
+    while True:
+        try:
+            d = leggi_catena()
+        except Exception as e:
+            st["errori"] = st.get("errori", 0) + 1
+            log(f"catena non leggibile ({st['errori']} di fila): {e}")
+            if st["errori"] % 288 == 6:  # dopo ~30 minuti di giri falliti, poi ogni ~24 ore
+                push(topic, f"Rilevatore lanci: nodi Bittensor non raggiungibili da {st['errori']} giri ({str(e)[:100]}). Controlli sospesi.", "Rilevatore lanci", "default")
+            STATE.write_text(json.dumps(st)); raise SystemExit(1)
+        if st.get("errori", 0) >= 6:
+            push(topic, f"Rilevatore lanci: catena di nuovo leggibile dopo {st['errori']} giri falliti.", "Rilevatore lanci", "default")
+        st["errori"] = 0
+        reg, aperte, attesa, finestra = controlla(topic, st, d)
+        STATE.write_text(json.dumps(st))
+        # controllo rapido solo se una subnet può aprire a momenti: altrimenti un solo controllo e fine
+        if not finestra or time.time() - inizio + passo > durata:
+            break
+        time.sleep(passo)
+
+    if os.environ.get("PROVA") == "true":  # avvio a mano con "prova": simula il lancio della subnet aperta più di recente
         k = max((k for k in reg if k in aperte and k != "0"), key=lambda k: reg[k])
         nome, simbolo, prezzo, pool = dettagli(d, int(k))
         push(topic, f"PROVA (non è un lancio): ultima subnet aperta SN{k} {nome} {simbolo}, prezzo {prezzo:.5f} TAO, pool {pool:,.0f} TAO.",
              f"PROVA rilevatore lanci SN{k}", "urgent", int(k))
-
-    st["reg"], st["aperte"] = reg, sorted(aperte, key=int)
     oggi = dt.date.today().isoformat()
     if dt.datetime.now().hour >= 9 and st.get("vivo") != oggi:
-        attesa = [k for k in reg if k not in aperte and k != "0"]
-        push(topic, f"Rilevatore lanci attivo: {len(reg) - 1} subnet, {len(attesa)} registrate in attesa di aprire gli scambi"
-                    + (f" (SN{', SN'.join(sorted(attesa, key=int))})" if attesa else "") + ".", "Rilevatore lanci ok", "low")
+        def cosa(k):
+            b = reg[k] + d["ritardo"] - d["blocco"]
+            return f"SN{k} " + ("pronta" if b <= 0 else quando(b).replace("dal ", "dal "))
+        push(topic, f"Rilevatore lanci attivo: {len(reg) - 1} subnet, {len(attesa)} in attesa di aprire gli scambi"
+                    + (f" ({'; '.join(cosa(k) for k in sorted(attesa, key=int))})" if attesa else "") + ".", "Rilevatore lanci ok", "low")
         st["vivo"] = oggi
     STATE.write_text(json.dumps(st))
 
