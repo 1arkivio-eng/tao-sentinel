@@ -1,7 +1,5 @@
 name: lanci-subnet
 on:
-  schedule:
-    - cron: "7,37 * * * *"   # ogni 30 minuti (repo privato: ~1.440 minuti Actions al mese, sotto i 2.000 gratuiti)
   workflow_dispatch:
     inputs:
       prova:

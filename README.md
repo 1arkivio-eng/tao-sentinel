@@ -14,7 +14,7 @@ compratori/venditori, vendite dei proprietari, prune rank) nel ramo `dati`, in `
 Serve a testare regole sui flussi, che Taosis fornisce solo in tempo reale.
 
 ## Lanci di nuove subnet
-`lanci.py` (workflow `lanci-subnet`, ogni 30 minuti) legge direttamente la blockchain Bittensor, la stessa fonte di Taostats e Taosis,
+`lanci.py` (workflow `lanci-subnet`, ora solo avvio a mano: il servizio automatico gira nel repo pubblico `tao-lanci`, minuti gratuiti) legge direttamente la blockchain Bittensor, la stessa fonte di Taostats e Taosis,
 tramite i nodi RPC pubblici. Avvisa su ntfy:
 - **Nuova subnet registrata** (priorità normale): scambi ancora chiusi, con la data più vicina in cui possono aprire.
 - **LANCIO, scambi aperti** (priorità urgente): il proprietario ha fatto lo *start call* e il flag on-chain `SubtokenEnabled` è diventato vero.
