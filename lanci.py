@@ -124,7 +124,7 @@ def dettagli(d, n):
         except Exception:
             return b""
     # nota: legge l'intera mappa (~130 voci); succede solo quando c'è un avviso
-    nome = testo_scale(uno(IDENTITA)) or f"SN{n}"
+    nome = testo_scale(uno(IDENTITA)) or "(senza nome)"
     simbolo = testo_scale(uno(SIMBOLO))
     tao, alpha = intero(uno(POOL_TAO)), intero(uno(POOL_ALPHA))
     prezzo = tao / alpha if alpha else 0
@@ -163,7 +163,8 @@ def controlla(topic, st, d):
                      f"LANCIO SN{n}: scambi aperti", "urgent", n)
             elif k not in aperte and d["blocco"] >= blocco_reg + d["ritardo"] and k not in st.get("pronte", []):
                 nome, simbolo, _, _ = dettagli(d, n)
-                push(topic, f"SN{n} {nome} {simbolo}: da ora il proprietario può aprire gli scambi in qualsiasi momento. Controllo rapido attivo.",
+                push(topic, f"SN{n} {nome} {simbolo}: da ora il proprietario può aprire gli scambi in qualsiasi momento."
+                            + (" Controllo rapido attivo." if float(os.environ.get("DURATA_MAX", "540")) > 0 else ""),
                      f"SN{n} pronta al lancio", "default", n)
     else:
         log("primo giro: memorizzo lo stato attuale, nessun avviso")
