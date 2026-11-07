@@ -1,0 +1,39 @@
+name: lanci-subnet
+on:
+  schedule:
+    - cron: "7,37 * * * *"   # ogni 30 minuti (repo privato: ~1.440 minuti Actions al mese, sotto i 2.000 gratuiti)
+  workflow_dispatch:
+    inputs:
+      prova:
+        description: "Manda una notifica di prova"
+        type: boolean
+        default: false
+concurrency:
+  group: lanci
+  cancel-in-progress: false
+jobs:
+  controllo:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v5
+      - name: Ripristina stato
+        uses: actions/cache/restore@v5
+        with:
+          path: stato_lanci.json
+          key: lanci-${{ github.run_id }}
+          restore-keys: lanci-
+      - name: Controllo lanci sulla catena (solo lettura)
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          PROVA: ${{ inputs.prova }}
+          TZ: Europe/Rome
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then echo "Manca il segreto NTFY_TOPIC"; exit 1; fi
+          python3 lanci.py
+      - name: Salva stato
+        if: always()
+        uses: actions/cache/save@v5
+        with:
+          path: stato_lanci.json
+          key: lanci-${{ github.run_id }}
