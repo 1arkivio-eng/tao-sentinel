@@ -1,0 +1,31 @@
+name: sentinella-stop
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+concurrency:
+  group: stop
+  cancel-in-progress: false
+jobs:
+  controllo:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v5
+      - name: Ripristina stato
+        uses: actions/cache/restore@v5
+        with:
+          path: stato_stop.json
+          key: stop-${{ github.run_id }}
+          restore-keys: stop-
+      - name: Prezzi dalla chain e controllo stop (solo lettura)
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          TZ: Europe/Rome
+        run: python3 stop.py || echo "giro saltato"
+      - name: Salva stato
+        if: always()
+        uses: actions/cache/save@v5
+        with:
+          path: stato_stop.json
+          key: stop-${{ github.run_id }}

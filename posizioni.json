@@ -1,45 +1,13 @@
 {
- "aggiornato": "2026-11-05 sera",
+ "aggiornato": "2026-11-13",
+ "nota": "Solo livelli di prezzo, nessuna quantità. Aggiornato da Claude quando l'utente manda lo screenshot del wallet.",
  "posizioni": {
-  "21": {
-   "nome": "SN21 AdTAO",
-   "stop": 0.0042,
-   "obiettivo": 0.0058
-  },
-  "4": {
-   "nome": "SN4 Targon",
-   "stop": 0.0533,
-   "obiettivo": 0.07
-  },
-  "116": {
-   "nome": "SN116 Carbon",
-   "stop": 0.029,
-   "obiettivo": 0.06,
-   "pianta": true,
-   "massimo": 0.04144405013359046,
-   "azione_obiettivo": "vendi 2/3, il resto corre"
-  },
-  "24": {
-   "nome": "SN24 ms.computer",
-   "stop": 0.0088,
-   "obiettivo": 0.014
-  },
-  "75": {
-   "nome": "SN75 Hippius",
-   "stop": 0.0159,
-   "obiettivo": 0.022
-  },
-  "117": {
-   "nome": "SN117 everyframe",
-   "stop": 0.0056,
-   "obiettivo": 0.0107,
-   "pianta": true,
-   "massimo": 0.00864004879541557,
-   "azione_obiettivo": "vendi 2/3, il resto corre"
-  },
-  "8": {
-   "nome": "SN8 Vanta",
-   "stop": 0.0291
-  }
+  "128": {"nome": "SN128 ByteLeap", "stop": 0.0027},
+  "8":   {"nome": "SN8 Vanta", "stop": 0.0335},
+  "127": {"nome": "SN127 Zils", "stop": 0.0030},
+  "58":  {"nome": "SN58 Attune", "stop": 0.0110},
+  "24":  {"nome": "SN24 ms.computer", "stop": 0.0125},
+  "99":  {"nome": "SN99 gani", "stop": 0.0255},
+  "112": {"nome": "SN112 THOR", "stop": 0.0082}
  }
 }

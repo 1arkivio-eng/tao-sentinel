@@ -5,3 +5,4 @@ ntfy_topic.txt
 __pycache__/
 passaggio_consegne.md
 stato_lanci.json
+stato_stop.json

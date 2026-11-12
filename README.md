@@ -22,3 +22,8 @@ tramite i nodi RPC pubblici. Avvisa su ntfy:
 
 Non usa Taosis come fonte perché blocca i server di GitHub (403 Cloudflare). Avvio a mano con "prova" = notifica di test.
 Stato in cache di Actions (`stato_lanci.json`); il primo giro memorizza la situazione senza avvisare.
+
+## Sentinella stop (attiva)
+`stop.py` ogni ~5 minuti legge i prezzi dalla chain Bittensor (SubnetTAO / SubnetAlphaIn, nodo pubblico Opentensor)
+e avvisa su ntfy quando una posizione di `posizioni.json` è entro il 2% dallo stop, lo supera o raggiunge l'obiettivo.
+Non usa Taosis (blocca GitHub). Il job non fallisce mai: niente email di errore.
