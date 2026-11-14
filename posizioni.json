@@ -1,13 +1,26 @@
 {
- "aggiornato": "2026-11-13",
+ "aggiornato": "2026-11-14",
  "nota": "Solo livelli di prezzo, nessuna quantità. Aggiornato da Claude quando l'utente manda lo screenshot del wallet.",
  "posizioni": {
-  "128": {"nome": "SN128 ByteLeap", "stop": 0.0027},
-  "8":   {"nome": "SN8 Vanta", "stop": 0.0335},
-  "127": {"nome": "SN127 Zils", "stop": 0.0030},
-  "58":  {"nome": "SN58 Attune", "stop": 0.0110},
-  "24":  {"nome": "SN24 ms.computer", "stop": 0.0125},
-  "99":  {"nome": "SN99 gani", "stop": 0.0255},
-  "112": {"nome": "SN112 THOR", "stop": 0.0082}
+  "8": {
+   "nome": "SN8 Vanta",
+   "stop": 0.0345
+  },
+  "127": {
+   "nome": "SN127 Zils",
+   "stop": 0.003
+  },
+  "58": {
+   "nome": "SN58 Attune",
+   "stop": 0.011
+  },
+  "99": {
+   "nome": "SN99 gani",
+   "stop": 0.0255
+  },
+  "112": {
+   "nome": "SN112 THOR",
+   "stop": 0.0082
+  }
  }
 }
