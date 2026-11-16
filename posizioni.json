@@ -1,5 +1,5 @@
 {
- "aggiornato": "2026-11-14 sera",
+ "aggiornato": "2026-11-16",
  "nota": "Solo livelli di prezzo, nessuna quantità. Aggiornato da Claude quando l'utente manda lo screenshot del wallet.",
  "posizioni": {
   "8": {
@@ -8,7 +8,7 @@
   },
   "58": {
    "nome": "SN58 Attune",
-   "stop": 0.011
+   "stop": 0.0119
   },
   "99": {
    "nome": "SN99 gani",
