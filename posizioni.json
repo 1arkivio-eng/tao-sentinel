@@ -24,6 +24,11 @@
    "obiettivo": 0.0052,
    "azione": "vendi metà",
    "movimento": 0.06
+  },
+  "26": {
+   "nome": "SN26 alchemy",
+   "stop": 0.0225,
+   "movimento": 0.08
   }
  }
 }
