@@ -17,6 +17,13 @@
   "112": {
    "nome": "SN112 THOR",
    "stop": 0.0082
+  },
+  "103": {
+   "nome": "SN103 Terza",
+   "stop": 0.0038,
+   "obiettivo": 0.0052,
+   "azione": "vendi metà",
+   "movimento": 0.06
   }
  }
 }

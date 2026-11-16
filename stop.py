@@ -79,6 +79,14 @@ def main():
             avvisa(f"s{k}", f"{nome}: {prezzo:.5f} SOTTO lo stop {stop} -> VENDI")
         elif prezzo <= stop * (1 + VICINO):
             avvisa(f"v{k}", f"{nome}: {prezzo:.5f} a meno del 2% dallo stop {stop} -> preparati a vendere")
+        if p.get("movimento"):  # sorveglianza stretta: avviso a ogni variazione di +/-X% dall'ultimo prezzo segnalato
+            rif = st.setdefault("rif", {}).get(k) or prezzo
+            soglia = float(p["movimento"])
+            if abs(prezzo / rif - 1) >= soglia:
+                push(topic, f"{nome}: {prezzo:.5f} ({(prezzo / rif - 1) * 100:+.0f}% dall'ultimo avviso {rif:.5f}). Stop {stop}.",
+                     "Movimento", "default")
+                rif = prezzo
+            st["rif"][k] = rif
         if p.get("obiettivo") and prezzo >= float(p["obiettivo"]):
             avvisa(f"o{k}", f"{nome}: {prezzo:.5f} OBIETTIVO {p['obiettivo']} -> {p.get('azione', 'vendi metà')}")
     oggi = dt.datetime.now().strftime("%Y-%m-%d")
