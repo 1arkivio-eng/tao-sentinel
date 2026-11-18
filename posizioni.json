@@ -1,5 +1,5 @@
 {
- "aggiornato": "2026-11-16",
+ "aggiornato": "2026-11-18",
  "nota": "Solo livelli di prezzo, nessuna quantità. Aggiornato da Claude quando l'utente manda lo screenshot del wallet.",
  "posizioni": {
   "8": {
@@ -11,8 +11,9 @@
    "stop": 0.0119
   },
   "99": {
-   "nome": "SN99 gani",
-   "stop": 0.0255
+   "nome": "SN99 Axonry",
+   "stop": 0.0225,
+   "movimento": 0.06
   },
   "112": {
    "nome": "SN112 THOR",
