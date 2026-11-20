@@ -1,23 +1,15 @@
 {
- "aggiornato": "2026-11-18",
+ "aggiornato": "2026-11-20",
  "nota": "Solo livelli di prezzo, nessuna quantità. Aggiornato da Claude quando l'utente manda lo screenshot del wallet.",
  "posizioni": {
   "8": {
    "nome": "SN8 Vanta",
    "stop": 0.0345
   },
-  "58": {
-   "nome": "SN58 Attune",
-   "stop": 0.0119
-  },
   "99": {
    "nome": "SN99 Axonry",
    "stop": 0.0225,
    "movimento": 0.06
-  },
-  "112": {
-   "nome": "SN112 THOR",
-   "stop": 0.0082
   },
   "103": {
    "nome": "SN103 Terza",
@@ -26,10 +18,10 @@
    "azione": "vendi metà",
    "movimento": 0.06
   },
-  "26": {
-   "nome": "SN26 alchemy",
-   "stop": 0.0225,
-   "movimento": 0.08
+  "113": {
+   "nome": "SN113 gje",
+   "stop": 0.0105,
+   "movimento": 0.06
   }
  }
 }
