@@ -1,27 +1,5 @@
 {
- "aggiornato": "2026-11-20",
- "nota": "Solo livelli di prezzo, nessuna quantità. Aggiornato da Claude quando l'utente manda lo screenshot del wallet.",
- "posizioni": {
-  "8": {
-   "nome": "SN8 Vanta",
-   "stop": 0.0345
-  },
-  "99": {
-   "nome": "SN99 Axonry",
-   "stop": 0.0225,
-   "movimento": 0.06
-  },
-  "103": {
-   "nome": "SN103 Terza",
-   "stop": 0.0038,
-   "obiettivo": 0.0052,
-   "azione": "vendi metà",
-   "movimento": 0.06
-  },
-  "113": {
-   "nome": "SN113 gje",
-   "stop": 0.0105,
-   "movimento": 0.06
-  }
- }
+ "aggiornato": "2026-11-21",
+ "nota": "Wallet tutto in TAO: nessuna posizione da sorvegliare. Gli avvisi lanci (tao-lanci) restano attivi.",
+ "posizioni": {}
 }
